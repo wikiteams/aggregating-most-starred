@@ -1,0 +1,119 @@
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2012-12-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-01-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-01-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-02-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-02-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-03-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-03-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-04-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-04-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-05-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-05-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-06-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-06-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-07-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-07-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-08-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-08-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-09-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-09-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-10-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-10-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-11-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
+
+SELECT repository_url, COUNT(repository_url) as delta_pushes, repository_owner, repository_name, repository_description, MAX(repository_watchers) as max_watchers, MAX(repository_forks) as max_forks, MIN(repository_watchers) as min_watchers, MIN(repository_forks) as min_forks, MAX(repository_watchers) - MIN(repository_watchers) as delta_watchers, MAX(repository_forks) - MIN(repository_forks) as delta_forks, repository_fork, MAX(repository_size) as max_size, MIN(repository_size) as min_size, MAX(repository_size) - MIN(repository_size) as delta_size, MAX(repository_open_issues) as max_issues, MIN(repository_open_issues) as min_issues, MAX(repository_open_issues) - MIN(repository_open_issues) as delta_issues, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch 
+FROM [githubarchive:github.timeline]
+where type='PushEvent'
+and PARSE_UTC_USEC(created_at) >= PARSE_UTC_USEC('2013-11-01 00:00:00')
+and PARSE_UTC_USEC(created_at) < PARSE_UTC_USEC('2013-12-01 00:00:00')
+and PARSE_UTC_USEC(repository_created_at) > PARSE_UTC_USEC('2011-12-01 00:00:00')
+GROUP EACH BY repository_url, repository_owner, repository_name, repository_description, repository_fork, repository_has_issues, repository_has_downloads, repository_has_wiki, repository_created_at, repository_master_branch
+ORDER BY delta_pushes DESC
+LIMIT 30000
