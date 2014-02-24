@@ -1,9 +1,17 @@
+'''
+Tool for downloading additional data into a dataset of most popular repositories
+(aggregated data maximum(sum(delta_stargazing)) from Google BigQuery)
+Nickname: Dubnadium
+@version 1.1
+@since 1.0
+@author Oskar Jarczyk
+'''
+
 import csv
 import codecs
 import cStringIO
-from github import Github, UnknownObjectException, GithubException
+from github import Github, UnknownObjectException
 import time
-import datetime
 import scream
 import gc
 import __builtin__
@@ -114,10 +122,11 @@ def freeze_more():
     freeze()
 
 
+LIMIT_DATA = False
+LIMIT_COUNT = 2000
+
+
 if __name__ == "__main__":
-    '''
-    Cryptonim: Dubnadium
-    '''
     scream.say('Start main execution')
     scream.say('Welcome to WikiTeams.pl small dataset enricher!')
 
@@ -162,30 +171,51 @@ if __name__ == "__main__":
 
     with open(filename__, 'rb') as source_csvfile:
         reposReader = UnicodeReader(source_csvfile)
-        with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
-            moredata_writer = UnicodeWriter(output_csvfile)
-            reposReader.next()
-            with open('result_stargazers_2013_final_mature_err.csv', 'ab') as err_csvfile:
-                errdata_writer = UnicodeWriter(output_csvfile)
-                for row in reposReader:
-                    try:
-                        i = i + 1
-                        owner = row[0]
-                        url = row[1]
-                        scream.say('url: ' + url)
-                        name = row[2]
-                        key = str(owner + '/' + name)
-                        print (key)
-                        repository = gh.get_repo(key)
-                        row.append(str(repository.stargazers_count))
-                        row.append(str(len(repository.get_stats_contributors())))
-                        moredata_writer.writerow(row)
-                        if i > 2000:
-                            break
-                        check_quota_limit()
-                    except TypeError:
-                        errdata_writer.writerow(row)
-                    except UnknownObjectException:
-                        errdata_writer.writerow(row)
-            output_csvfile.close()
-            err_csvfile.close()
+        with open('result_stargazers_2013_final_mature_stargazers.csv', 'ab') as stargazers_csvfile:
+            stargazers_writer = UnicodeWriter(stargazers_csvfile)
+            with open('result_stargazers_2013_final_mature_contributors.csv', 'ab') as contributors_csvfile:
+                contributors_writer = UnicodeWriter(contributors_csvfile)
+                with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
+                    moredata_writer = UnicodeWriter(output_csvfile)
+                    reposReader.next()
+                    with open('result_stargazers_2013_final_mature_err.csv', 'ab') as err_csvfile:
+                        errdata_writer = UnicodeWriter(output_csvfile)
+                        for row in reposReader:
+                            try:
+                                i = i + 1
+                                owner = row[0]
+                                url = row[1]
+                                scream.say('url: ' + url)
+                                name = row[2]
+                                key = str(owner + '/' + name)
+                                scream.say(key)
+                                repository = gh.get_repo(key)
+                                stargazers_count = repository.stargazers_count
+                                row.append(str(stargazers_count))
+                                scream.say('stargazers: ' + str(stargazers_count))
+                                contributors_list = repository.get_contributors()
+                                stargazers_list = repository.get_stargazers()
+                                how_many_contributors = 0
+                                how_many_stargazers = 0
+                                for contributor in contributors_list:
+                                    how_many_contributors += 1
+                                    contributors_writer.writerow([url, contributor.login])
+                                for stargazer in stargazers_list:
+                                    how_many_stargazers += 1
+                                    stargazers_writer.writerow([url, stargazer.login])
+                                scream.say('contributors: ' + str(how_many_contributors))
+                                row.append(str(how_many_contributors))
+                                scream.say('stargazers: ' + str(how_many_stargazers))
+                                row.append(str(how_many_stargazers))
+                                moredata_writer.writerow(row)
+                                if LIMIT_DATA and (i > LIMIT_COUNT):
+                                    break
+                                check_quota_limit()
+                            except TypeError:
+                                errdata_writer.writerow(row)
+                            except UnknownObjectException:
+                                errdata_writer.writerow(row)
+                    output_csvfile.close()
+                    err_csvfile.close()
+                contributors_writer.close()
+            stargazers_writer.close()
