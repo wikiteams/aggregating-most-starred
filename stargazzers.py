@@ -152,29 +152,7 @@ def is_number(s):
 
 
 def analyze_tag(tag):
-    data = tag.strings
-    for single in data:
-        if (single is not None) and is_number(single.strip().replace(",", "")):
-            return single.strip().replace(",", "")
-    data = tag.children
-    for single in data:
-        if type(single) is NavigableString:
-            if (single is not None) and is_number(single.strip().replace(",", "")):
-                return single.strip().replace(",", "")
-        elif type(single) is Tag:
-            for content in single.contents:
-                if (content is not None) and is_number(content.string.strip().replace(",", "")):
-                    return single.string.strip().replace(",", "")
-    data = tag.descendants
-    for single in data:
-        if type(single) is NavigableString:
-            if (single is not None) and is_number(single.strip().replace(",", "")):
-                return single.strip().replace(",", "")
-        elif type(single) is Tag:
-            for content in single.contents:
-                if (content is not None) and is_number(content.string.strip().replace(",", "")):
-                    return single.string.strip().replace(",", "")
-    number = filter(r'\d*[,]?\d+', tag.html)
+    number = filter(lambda x: x.isdigit(), str(tag))
     return number
 
 
@@ -198,7 +176,7 @@ if __name__ == "__main__":
     for o, a in opts:
         if o in ("-v", "--verbose"):
             __builtin__.verbose = True
-            scream.intelliAurom_verbose = True
+            scream.stargazzers_verbose = True
             scream.say('Enabling verbose mode.')
         elif o in ("-h", "--help"):
             usage()
@@ -338,7 +316,7 @@ if __name__ == "__main__":
                                     try:
                                         doc = html.parse(urllib2.urlopen(url))
                                         ns = doc.xpath('//ul[@class="numbers-summary"]')
-                                        scream.say('Element found?: ' + (len(ns) == 1))
+                                        scream.say('Element found?: ' + str(len(ns) == 1))
                                         element = ns[0]
                                         local_soup = BeautifulSoup(etree.tostring(element))
                                     except urllib2.HTTPError:
@@ -347,7 +325,9 @@ if __name__ == "__main__":
                                         break
                                 enumarables = local_soup.findAll("li")
                                 commits = enumarables[0]
+                                scream.say('enumarables[0]')
                                 commits_number = analyze_tag(commits.find("span", {"class": "num"}))
+                                scream.say('analyze_tag finished execution for commits_number')
                                 print commits_number
                                 branches = enumarables[1]
                                 branches_number = analyze_tag(branches.find("span", {"class": "num"}))
@@ -359,12 +339,20 @@ if __name__ == "__main__":
                                 contributors_number = analyze_tag(contributors.find("span", {"class": "num"}))
                                 print contributors_number
                                 break
-                            except TypeError:
-                                # i already implemented selenium, so this won't have appliations anymore i believe :)
+                            except TypeError as ot:
+                                if use_selenium:
+                                    output_nonexistent_writer.writerow(row)
+                                    break
+                                    # i already implemented selenium, so this won't have appliations anymore i believe :)
+                                scream.log_warning("TypeError error({0})".format(ot))
                                 scream.say(contributors)
                                 scream.say('Timeout: 5s')
                                 time.sleep(5)
                                 scream.say('Will try again... GitHub didnt manage to fetch on time?')
+                            except:
+                                if use_selenium:
+                                    output_nonexistent_writer.writerow(row)
+                                    break
                             finally:
                                 scream.say('Moving on to writing row and next record...')
                         row.append(commits_number)
