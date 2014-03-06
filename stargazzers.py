@@ -338,6 +338,8 @@ if __name__ == "__main__":
                                 break
                             except TypeError:
                                 scream.say(contributors)
+                                scream.say('Timeout: 5s')
+                                time.sleep(5)
                                 scream.say('Will try again... GitHub didnt manage to fetch on time?')
                             finally:
                                 scream.say('Moving on to writing row and next record...')
