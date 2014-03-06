@@ -160,16 +160,20 @@ def analyze_tag(tag):
             if (single is not None) and is_number(single.strip().replace(",", "")):
                 return single.strip().replace(",", "")
         elif type(single) is Tag:
-            if (single is not None) and is_number(single.string.strip().replace(",", "")):
-                return single.string.strip().replace(",", "")
+            for content in single.contents:
+                if (content is not None) and is_number(content.string.strip().replace(",", "")):
+                    return single.string.strip().replace(",", "")
     data = tag.descendants
     for single in data:
         if type(single) is NavigableString:
             if (single is not None) and is_number(single.strip().replace(",", "")):
                 return single.strip().replace(",", "")
         elif type(single) is Tag:
-            if (single is not None) and is_number(single.string.strip().replace(",", "")):
-                return single.string.strip().replace(",", "")
+            for content in single.contents:
+                if (content is not None) and is_number(content.string.strip().replace(",", "")):
+                    return single.string.strip().replace(",", "")
+    number = filter(r'\d*[,]?\d+', tag.html)
+    return number
 
 
 if __name__ == "__main__":
@@ -305,36 +309,38 @@ if __name__ == "__main__":
                     headers.append('contributors_count')
                     moredata_writer.writerow(headers)
                     for row in reposReader:
-                        scream.say('Line processing.. ')
-                        url = row[1].strip('"')
-                        try:
-                            doc = html.parse(urllib2.urlopen(url))
-                        except urllib2.HTTPError:
-                            scream.say('HTTP error. Repo non-existent ?')
-                            output_nonexistent_writer.writerow(row)
-                        ns = doc.xpath('//ul[@class="numbers-summary"]')
-                        scream.say(len(ns))
-                        element = ns[0]
-                        local_soup = BeautifulSoup(etree.tostring(element))
-                        enumarables = local_soup.findAll("li")
-                        commits = enumarables[0]
-                        commits_number = analyze_tag(commits.find("span", {"class": "num"}))
-                        #commits_number = commits.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                        print commits_number
-                        #commits_number = commits.contents[0].contents[0]
-                        branches = enumarables[1]
-                        branches_number = analyze_tag(branches.find("span", {"class": "num"}))
-                        #branches_number = branches.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                        print branches_number
-                        releases = enumarables[2]
-                        releases_number = analyze_tag(releases.find("span", {"class": "num"}))
-                        #releases_number = releases.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                        print releases_number
-                        contributors = enumarables[3]
-                        contributors_number = analyze_tag(contributors.find("span", {"class": "num"}))
-                        #contributors_number = [x for x in .contents) if is_number(x.strip().replace(",", ""))]
-                        #contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                        print contributors_number
+                        while True:
+                            try:
+                                scream.say('Line processing.. ')
+                                url = row[1].strip('"')
+                                try:
+                                    doc = html.parse(urllib2.urlopen(url))
+                                except urllib2.HTTPError:
+                                    scream.say('HTTP error. Repo non-existent ?')
+                                    output_nonexistent_writer.writerow(row)
+                                ns = doc.xpath('//ul[@class="numbers-summary"]')
+                                scream.say(len(ns))
+                                element = ns[0]
+                                local_soup = BeautifulSoup(etree.tostring(element))
+                                enumarables = local_soup.findAll("li")
+                                commits = enumarables[0]
+                                commits_number = analyze_tag(commits.find("span", {"class": "num"}))
+                                print commits_number
+                                branches = enumarables[1]
+                                branches_number = analyze_tag(branches.find("span", {"class": "num"}))
+                                print branches_number
+                                releases = enumarables[2]
+                                releases_number = analyze_tag(releases.find("span", {"class": "num"}))
+                                print releases_number
+                                contributors = enumarables[3]
+                                contributors_number = analyze_tag(contributors.find("span", {"class": "num"}))
+                                print contributors_number
+                                break
+                            except TypeError:
+                                scream.say(contributors)
+                                scream.say('Will try again... GitHub didnt manage to fetch on time?')
+                            finally:
+                                scream.say('Moving on to writing row and next record...')
                         row.append(commits_number)
                         row.append(branches_number)
                         row.append(releases_number)
