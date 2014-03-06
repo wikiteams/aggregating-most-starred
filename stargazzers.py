@@ -32,7 +32,7 @@ __builtin__.verbose = True
 class MyDialect(csv.Dialect):
     strict = True
     skipinitialspace = True
-    quoting = csv.QUOTE_MINIMAL
+    quoting = csv.QUOTE_ALL
     delimiter = ';'
     escapechar = '\\'
     quotechar = '"'
@@ -262,7 +262,12 @@ if __name__ == "__main__":
             reposReader = UnicodeReader(source_csvfile)
             with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
                 moredata_writer = UnicodeWriter(output_csvfile)
-                reposReader.next()
+                headers = reposReader.next()
+                headers.append('commits_count')
+                headers.append('branches_count')
+                headers.append('releases_count')
+                headers.append('contributors_count')
+                moredata_writer.writerow(headers)
                 for row in reposReader:
                     scream.say('Line processing.. ')
                     url = row[1].strip('"')
@@ -276,17 +281,17 @@ if __name__ == "__main__":
                     local_soup = BeautifulSoup(etree.tostring(element))
                     enumarables = local_soup.findAll("li")
                     commits = enumarables[0]
-                    commits_number = commits.find("span", {"class": "num"}).contents[2].strip()
+                    commits_number = commits.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
                     print commits_number
                     #commits_number = commits.contents[0].contents[0]
                     branches = enumarables[1]
-                    branches_number = branches.find("span", {"class": "num"}).contents[2].strip()
+                    branches_number = branches.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
                     print branches_number
                     releases = enumarables[2]
-                    releases_number = releases.find("span", {"class": "num"}).contents[2].strip()
+                    releases_number = releases.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
                     print releases_number
                     contributors = enumarables[3]
-                    contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip()
+                    contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
                     print contributors_number
                     row.append(commits_number)
                     row.append(branches_number)
