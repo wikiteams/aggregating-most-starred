@@ -20,6 +20,8 @@ import sys
 from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import html, etree
 import urllib2
+from pyvirtualdisplay import Display
+from selenium import webdriver
 import __builtin__
 
 
@@ -183,9 +185,10 @@ if __name__ == "__main__":
     skip_full_lists = True
     method = 'bs'
     add_delimiter_info = False
+    use_selenium = True
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hm:vd", ["help", "method=", "verbose", "delimiter"])
+        opts, args = getopt.getopt(sys.argv[1:], "hm:s:vd", ["help", "method=", "selenium=", "verbose", "delimiter"])
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err)  # will print something like "option -a not recognized"
@@ -204,6 +207,8 @@ if __name__ == "__main__":
             add_delimiter_info = True
         elif o in ("-m", "--method"):
             method = a
+        elif o in ("-s", "--selenium"):
+            use_selenium = (a.strip() in ['True', 'true', 1])
 
     is_gc_turned_on = 'turned on' if str(gc.isenabled()) else 'turned off'
     scream.say('Garbage collector is ' + is_gc_turned_on)
@@ -296,6 +301,12 @@ if __name__ == "__main__":
                 stargazers_writer.close()
     elif 'bs' in method:
         scream.say('Using beautiful soup to get rest of the fields')
+        if use_selenium:
+            scream.say('Initiating selenium...')
+            display = Display(visible=0, size=(1024, 768))
+            display.start()
+            browser = webdriver.Firefox()
+        scream.say('Selenium ready for action')
         with open(filename__, 'rb') as source_csvfile:
             reposReader = UnicodeReader(source_csvfile)
             with open('result_stargazers_2013_final_mature_stars_deleted_repos.csv', 'ab') as output_ne_csvfile:
@@ -313,15 +324,27 @@ if __name__ == "__main__":
                             try:
                                 scream.say('Line processing.. ')
                                 url = row[1].strip('"')
-                                try:
-                                    doc = html.parse(urllib2.urlopen(url))
-                                except urllib2.HTTPError:
-                                    scream.say('HTTP error. Repo non-existent ?')
-                                    output_nonexistent_writer.writerow(row)
-                                ns = doc.xpath('//ul[@class="numbers-summary"]')
-                                scream.say(len(ns))
-                                element = ns[0]
-                                local_soup = BeautifulSoup(etree.tostring(element))
+                                if use_selenium:
+                                    browser.get(url)
+                                    scream.say('Data from web retrieved')
+                                    doc = html.document_fromstring(unicode(browser.page_source))
+                                    scream.say('Page source sent further')
+                                    ns = doc.xpath('//ul[@class="numbers-summary"]')
+                                    scream.say('Xpath done searching')
+                                    scream.say('Element found?: ' + str(len(ns) == 1))
+                                    element = ns[0]
+                                    local_soup = BeautifulSoup(etree.tostring(element))
+                                else:
+                                    try:
+                                        doc = html.parse(urllib2.urlopen(url))
+                                        ns = doc.xpath('//ul[@class="numbers-summary"]')
+                                        scream.say('Element found?: ' + (len(ns) == 1))
+                                        element = ns[0]
+                                        local_soup = BeautifulSoup(etree.tostring(element))
+                                    except urllib2.HTTPError:
+                                        scream.say('HTTP error. Repo non-existent ?')
+                                        output_nonexistent_writer.writerow(row)
+                                        break
                                 enumarables = local_soup.findAll("li")
                                 commits = enumarables[0]
                                 commits_number = analyze_tag(commits.find("span", {"class": "num"}))
@@ -337,6 +360,7 @@ if __name__ == "__main__":
                                 print contributors_number
                                 break
                             except TypeError:
+                                # i already implemented selenium, so this won't have appliations anymore i believe :)
                                 scream.say(contributors)
                                 scream.say('Timeout: 5s')
                                 time.sleep(5)
@@ -348,3 +372,5 @@ if __name__ == "__main__":
                         row.append(releases_number)
                         row.append(contributors_number)
                         moredata_writer.writerow(row)
+    browser.close()
+    display.stop()
