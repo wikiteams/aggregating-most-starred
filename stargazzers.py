@@ -2,7 +2,8 @@
 Tool for downloading additional data into a dataset of most popular repositories
 (aggregated data maximum(sum(delta_stargazing)) from Google BigQuery)
 Nickname: Dubnadium
-@version 1.1
+
+@version 1.2
 @since 1.0
 @author Oskar Jarczyk
 '''
@@ -14,6 +15,8 @@ from github import Github, UnknownObjectException
 import time
 import scream
 import gc
+import getopt
+import sys
 import __builtin__
 
 
@@ -122,6 +125,12 @@ def freeze_more():
     freeze()
 
 
+def usage():
+    f = open('usage.txt', 'r')
+    for line in f:
+        print line
+
+
 LIMIT_DATA = False
 LIMIT_COUNT = 2000
 
@@ -130,92 +139,121 @@ if __name__ == "__main__":
     scream.say('Start main execution')
     scream.say('Welcome to WikiTeams.pl small dataset enricher!')
 
-    secrets = []
-    credential_list = []
-    with open('pass.txt', 'r') as passfile:
-        line__id = 0
-        for line in passfile:
-            line__id += 1
-            secrets.append(line)
-            if line__id % 4 == 0:
-                login_or_token__ = str(secrets[0]).strip()
-                pass_string = str(secrets[1]).strip()
-                client_id__ = str(secrets[2]).strip()
-                client_secret__ = str(secrets[3]).strip()
-                credential_list.append(
-                    {'login': login_or_token__, 'pass': pass_string,
-                     'client_id': client_id__,
-                     'client_secret': client_secret__}
-                )
-                del secrets[:]
+    skip_full_lists = True
+    method = 'bs'
+    add_delimiter_info = False
 
-    scream.say(str(len(credential_list)) +
-               ' full credentials successfully loaded')
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hm:vd", ["help", "method=", "verbose", "delimiter"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        print str(err)  # will print something like "option -a not recognized"
+        usage()
+        sys.exit(2)
 
-    if auth_with_tokens:
-        gh = Github(client_id=credential_list[0]['client_id'],
-                    client_secret=credential_list[0]['client_secret'])
-        print credential_list[0]['client_id']
-        print credential_list[0]['client_secret']
-        print gh.oauth_scopes
-        print gh.rate_limiting
-    else:
-        #print login_or_token__
-        #print pass_string
-        gh = Github(credential_list[0]['login'], credential_list[0]['pass'])
+    for o, a in opts:
+        if o in ("-v", "--verbose"):
+            __builtin__.verbose = True
+            scream.intelliAurom_verbose = True
+            scream.say('Enabling verbose mode.')
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif o in ("-d", "--delimiter"):
+            add_delimiter_info = True
+        elif o in ("-m", "--method"):
+            method = a
 
     is_gc_turned_on = 'turned on' if str(gc.isenabled()) else 'turned off'
     scream.say('Garbage collector is ' + is_gc_turned_on)
 
-    i = 0
+    if 'api' in method:
+        secrets = []
+        credential_list = []
+        with open('pass.txt', 'r') as passfile:
+            line__id = 0
+            for line in passfile:
+                line__id += 1
+                secrets.append(line)
+                if line__id % 4 == 0:
+                    login_or_token__ = str(secrets[0]).strip()
+                    pass_string = str(secrets[1]).strip()
+                    client_id__ = str(secrets[2]).strip()
+                    client_secret__ = str(secrets[3]).strip()
+                    credential_list.append(
+                        {'login': login_or_token__, 'pass': pass_string,
+                         'client_id': client_id__,
+                         'client_secret': client_secret__}
+                    )
+                    del secrets[:]
 
-    with open(filename__, 'rb') as source_csvfile:
-        reposReader = UnicodeReader(source_csvfile)
-        with open('result_stargazers_2013_final_mature_stargazers.csv', 'ab') as stargazers_csvfile:
-            stargazers_writer = UnicodeWriter(stargazers_csvfile)
-            with open('result_stargazers_2013_final_mature_contributors.csv', 'ab') as contributors_csvfile:
-                contributors_writer = UnicodeWriter(contributors_csvfile)
-                with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
-                    moredata_writer = UnicodeWriter(output_csvfile)
-                    reposReader.next()
-                    with open('result_stargazers_2013_final_mature_err.csv', 'ab') as err_csvfile:
-                        errdata_writer = UnicodeWriter(output_csvfile)
-                        for row in reposReader:
-                            try:
-                                i = i + 1
-                                owner = row[0]
-                                url = row[1]
-                                scream.say('url: ' + url)
-                                name = row[2]
-                                key = str(owner + '/' + name)
-                                scream.say(key)
-                                repository = gh.get_repo(key)
-                                stargazers_count = repository.stargazers_count
-                                row.append(str(stargazers_count))
-                                scream.say('stargazers: ' + str(stargazers_count))
-                                contributors_list = repository.get_contributors()
-                                stargazers_list = repository.get_stargazers()
-                                how_many_contributors = 0
-                                how_many_stargazers = 0
-                                for contributor in contributors_list:
-                                    how_many_contributors += 1
-                                    contributors_writer.writerow([url, contributor.login])
-                                for stargazer in stargazers_list:
-                                    how_many_stargazers += 1
-                                    stargazers_writer.writerow([url, stargazer.login])
-                                scream.say('contributors: ' + str(how_many_contributors))
-                                row.append(str(how_many_contributors))
-                                scream.say('stargazers: ' + str(how_many_stargazers))
-                                row.append(str(how_many_stargazers))
-                                moredata_writer.writerow(row)
-                                if LIMIT_DATA and (i > LIMIT_COUNT):
-                                    break
-                                check_quota_limit()
-                            except TypeError:
-                                errdata_writer.writerow(row)
-                            except UnknownObjectException:
-                                errdata_writer.writerow(row)
-                    output_csvfile.close()
-                    err_csvfile.close()
-                contributors_writer.close()
-            stargazers_writer.close()
+        scream.say(str(len(credential_list)) +
+                   ' full credentials successfully loaded')
+
+        if auth_with_tokens:
+            gh = Github(client_id=credential_list[0]['client_id'],
+                        client_secret=credential_list[0]['client_secret'])
+            print credential_list[0]['client_id']
+            print credential_list[0]['client_secret']
+            print gh.oauth_scopes
+            print gh.rate_limiting
+        else:
+            gh = Github(credential_list[0]['login'], credential_list[0]['pass'])
+
+        i = 0
+
+        with open(filename__, 'rb') as source_csvfile:
+            reposReader = UnicodeReader(source_csvfile)
+            with open('result_stargazers_2013_final_mature_stargazers.csv', 'ab') as stargazers_csvfile:
+                stargazers_writer = UnicodeWriter(stargazers_csvfile)
+                with open('result_stargazers_2013_final_mature_contributors.csv', 'ab') as contributors_csvfile:
+                    contributors_writer = UnicodeWriter(contributors_csvfile)
+                    with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
+                        moredata_writer = UnicodeWriter(output_csvfile)
+                        reposReader.next()
+                        with open('result_stargazers_2013_final_mature_err.csv', 'ab') as err_csvfile:
+                            errdata_writer = UnicodeWriter(output_csvfile)
+                            for row in reposReader:
+                                try:
+                                    i = i + 1
+                                    owner = row[0]
+                                    url = row[1]
+                                    scream.say('url: ' + url)
+                                    name = row[2]
+                                    key = str(owner + '/' + name)
+                                    scream.say(key)
+                                    repository = gh.get_repo(key)
+                                    stargazers_count = repository.stargazers_count
+                                    row.append(str(stargazers_count))
+                                    scream.say('stargazers: ' + str(stargazers_count))
+                                    if not skip_full_lists:
+                                        contributors_list = repository.get_contributors()
+                                        stargazers_list = repository.get_stargazers()
+                                        how_many_contributors = 0
+                                        how_many_stargazers = 0
+                                        for contributor in contributors_list:
+                                            how_many_contributors += 1
+                                            contributors_writer.writerow([url, contributor.login])
+                                        for stargazer in stargazers_list:
+                                            how_many_stargazers += 1
+                                            stargazers_writer.writerow([url, stargazer.login])
+                                        scream.say('contributors: ' + str(how_many_contributors))
+                                        row.append(str(how_many_contributors))
+                                        scream.say('stargazers: ' + str(how_many_stargazers))
+                                        row.append(str(how_many_stargazers))
+                                    moredata_writer.writerow(row)
+                                    if LIMIT_DATA and (i > LIMIT_COUNT):
+                                        break
+                                    check_quota_limit()
+                                except TypeError:
+                                    errdata_writer.writerow(row)
+                                except UnknownObjectException:
+                                    errdata_writer.writerow(row)
+                        output_csvfile.close()
+                        err_csvfile.close()
+                    contributors_writer.close()
+                stargazers_writer.close()
+    elif 'api' in method:
+        scream.say('Using beautiful soup to get rest of the fields')
+        with open(filename__, 'rb') as source_csvfile:
+            reposReader = UnicodeReader(source_csvfile)
