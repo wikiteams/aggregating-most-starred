@@ -17,7 +17,7 @@ import scream
 import gc
 import getopt
 import sys
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import html, etree
 import urllib2
 import __builtin__
@@ -150,11 +150,26 @@ def is_number(s):
 
 
 def analyze_tag(tag):
+    data = tag.strings
+    for single in data:
+        if (single is not None) and is_number(single.strip().replace(",", "")):
+            return single.strip().replace(",", "")
+    data = tag.children
+    for single in data:
+        if type(single) is NavigableString:
+            if (single is not None) and is_number(single.strip().replace(",", "")):
+                return single.strip().replace(",", "")
+        elif type(single) is Tag:
+            if (single is not None) and is_number(single.string.strip().replace(",", "")):
+                return single.string.strip().replace(",", "")
     data = tag.descendants
     for single in data:
         if type(single) is NavigableString:
-            if is_number(single.strip().replace(",", "")):
+            if (single is not None) and is_number(single.strip().replace(",", "")):
                 return single.strip().replace(",", "")
+        elif type(single) is Tag:
+            if (single is not None) and is_number(single.string.strip().replace(",", "")):
+                return single.string.strip().replace(",", "")
 
 
 if __name__ == "__main__":
