@@ -17,7 +17,7 @@ import scream
 import gc
 import getopt
 import sys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from lxml import html, etree
 import urllib2
 import __builtin__
@@ -136,6 +136,25 @@ def usage():
 
 LIMIT_DATA = False
 LIMIT_COUNT = 2000
+
+
+def is_number(s):
+    try:
+        float(s)  # for int, long and float
+    except ValueError:
+        try:
+            complex(s)  # for complex
+        except ValueError:
+            return False
+    return True
+
+
+def analyze_tag(tag):
+    data = tag.descendants
+    for single in data:
+        if type(single) is NavigableString:
+            if is_number(single.strip().replace(",", "")):
+                return single.strip().replace(",", "")
 
 
 if __name__ == "__main__":
@@ -260,41 +279,49 @@ if __name__ == "__main__":
         scream.say('Using beautiful soup to get rest of the fields')
         with open(filename__, 'rb') as source_csvfile:
             reposReader = UnicodeReader(source_csvfile)
-            with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
-                moredata_writer = UnicodeWriter(output_csvfile)
-                headers = reposReader.next()
-                headers.append('commits_count')
-                headers.append('branches_count')
-                headers.append('releases_count')
-                headers.append('contributors_count')
-                moredata_writer.writerow(headers)
-                for row in reposReader:
-                    scream.say('Line processing.. ')
-                    url = row[1].strip('"')
-                    try:
-                        doc = html.parse(url)
-                    except IOError:
-                        doc = html.parse(urllib2.urlopen(url))
-                    ns = doc.xpath('//ul[@class="numbers-summary"]')
-                    scream.say(len(ns))
-                    element = ns[0]
-                    local_soup = BeautifulSoup(etree.tostring(element))
-                    enumarables = local_soup.findAll("li")
-                    commits = enumarables[0]
-                    commits_number = commits.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                    print commits_number
-                    #commits_number = commits.contents[0].contents[0]
-                    branches = enumarables[1]
-                    branches_number = branches.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                    print branches_number
-                    releases = enumarables[2]
-                    releases_number = releases.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                    print releases_number
-                    contributors = enumarables[3]
-                    contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
-                    print contributors_number
-                    row.append(commits_number)
-                    row.append(branches_number)
-                    row.append(releases_number)
-                    row.append(contributors_number)
-                    moredata_writer.writerow(row)
+            with open('result_stargazers_2013_final_mature_stars_deleted_repos.csv', 'ab') as output_ne_csvfile:
+                output_nonexistent_writer = UnicodeWriter(output_ne_csvfile)
+                with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
+                    moredata_writer = UnicodeWriter(output_csvfile)
+                    headers = reposReader.next()
+                    headers.append('commits_count')
+                    headers.append('branches_count')
+                    headers.append('releases_count')
+                    headers.append('contributors_count')
+                    moredata_writer.writerow(headers)
+                    for row in reposReader:
+                        scream.say('Line processing.. ')
+                        url = row[1].strip('"')
+                        try:
+                            doc = html.parse(urllib2.urlopen(url))
+                        except urllib2.HTTPError:
+                            scream.say('HTTP error. Repo non-existent ?')
+                            output_nonexistent_writer.writerow(row)
+                        ns = doc.xpath('//ul[@class="numbers-summary"]')
+                        scream.say(len(ns))
+                        element = ns[0]
+                        local_soup = BeautifulSoup(etree.tostring(element))
+                        enumarables = local_soup.findAll("li")
+                        commits = enumarables[0]
+                        commits_number = analyze_tag(commits.find("span", {"class": "num"}))
+                        #commits_number = commits.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
+                        print commits_number
+                        #commits_number = commits.contents[0].contents[0]
+                        branches = enumarables[1]
+                        branches_number = analyze_tag(branches.find("span", {"class": "num"}))
+                        #branches_number = branches.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
+                        print branches_number
+                        releases = enumarables[2]
+                        releases_number = analyze_tag(releases.find("span", {"class": "num"}))
+                        #releases_number = releases.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
+                        print releases_number
+                        contributors = enumarables[3]
+                        contributors_number = analyze_tag(contributors.find("span", {"class": "num"}))
+                        #contributors_number = [x for x in .contents) if is_number(x.strip().replace(",", ""))]
+                        #contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip().replace(",", "")
+                        print contributors_number
+                        row.append(commits_number)
+                        row.append(branches_number)
+                        row.append(releases_number)
+                        row.append(contributors_number)
+                        moredata_writer.writerow(row)
