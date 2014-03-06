@@ -17,6 +17,9 @@ import scream
 import gc
 import getopt
 import sys
+from bs4 import BeautifulSoup
+from lxml import html, etree
+import urllib2
 import __builtin__
 
 
@@ -253,7 +256,40 @@ if __name__ == "__main__":
                         err_csvfile.close()
                     contributors_writer.close()
                 stargazers_writer.close()
-    elif 'api' in method:
+    elif 'bs' in method:
         scream.say('Using beautiful soup to get rest of the fields')
         with open(filename__, 'rb') as source_csvfile:
             reposReader = UnicodeReader(source_csvfile)
+            with open('result_stargazers_2013_final_mature_stars.csv', 'ab') as output_csvfile:
+                moredata_writer = UnicodeWriter(output_csvfile)
+                reposReader.next()
+                for row in reposReader:
+                    scream.say('Line processing.. ')
+                    url = row[1].strip('"')
+                    try:
+                        doc = html.parse(url)
+                    except IOError:
+                        doc = html.parse(urllib2.urlopen(url))
+                    ns = doc.xpath('//ul[@class="numbers-summary"]')
+                    scream.say(len(ns))
+                    element = ns[0]
+                    local_soup = BeautifulSoup(etree.tostring(element))
+                    enumarables = local_soup.findAll("li")
+                    commits = enumarables[0]
+                    commits_number = commits.find("span", {"class": "num"}).contents[2].strip()
+                    print commits_number
+                    #commits_number = commits.contents[0].contents[0]
+                    branches = enumarables[1]
+                    branches_number = branches.find("span", {"class": "num"}).contents[2].strip()
+                    print branches_number
+                    releases = enumarables[2]
+                    releases_number = releases.find("span", {"class": "num"}).contents[2].strip()
+                    print releases_number
+                    contributors = enumarables[3]
+                    contributors_number = contributors.find("span", {"class": "num"}).contents[2].strip()
+                    print contributors_number
+                    row.append(commits_number)
+                    row.append(branches_number)
+                    row.append(releases_number)
+                    row.append(contributors_number)
+                    moredata_writer.writerow(row)
