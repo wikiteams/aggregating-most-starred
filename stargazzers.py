@@ -17,7 +17,7 @@ import scream
 import gc
 import getopt
 import sys
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup
 from lxml import html, etree
 import urllib2
 from pyvirtualdisplay import Display
@@ -287,6 +287,7 @@ if __name__ == "__main__":
             display = Display(visible=0, size=(1024, 768))
             display.start()
             browser = webdriver.Firefox()
+            browser.implicitly_wait(15)
         scream.say('Selenium ready for action')
         with open(filename__, 'rb') as source_csvfile:
             reposReader = UnicodeReader(source_csvfile)
@@ -314,15 +315,19 @@ if __name__ == "__main__":
                                 scream.say('Line processing.. ')
                                 url = row[1].strip('"')
                                 if use_selenium:
-                                    browser.get(url)
-                                    scream.say('Data from web retrieved')
-                                    doc = html.document_fromstring(unicode(browser.page_source))
-                                    scream.say('Page source sent further')
-                                    ns = doc.xpath('//ul[@class="numbers-summary"]')
-                                    scream.say('Xpath done searching')
-                                    scream.say('Element found?: ' + str(len(ns) == 1))
-                                    element = ns[0]
-                                    local_soup = BeautifulSoup(etree.tostring(element))
+                                    while True:
+                                        browser.set_page_load_timeout(15)
+                                        browser.get(url)
+                                        scream.say('Data from web retrieved')
+                                        doc = html.document_fromstring(unicode(browser.page_source))
+                                        scream.say('Page source sent further')
+                                        ns = doc.xpath('//ul[@class="numbers-summary"]')
+                                        scream.say('Xpath done searching')
+                                        scream.say('Element found?: ' + str(len(ns) == 1))
+                                        element = ns[0]
+                                        local_soup = BeautifulSoup(etree.tostring(element))
+                                        break
+                                        scream.say('No response from selenium. Retry')
                                 else:
                                     try:
                                         doc = html.parse(urllib2.urlopen(url))
