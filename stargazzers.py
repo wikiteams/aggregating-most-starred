@@ -164,9 +164,10 @@ if __name__ == "__main__":
     method = 'bs'
     add_delimiter_info = False
     use_selenium = True
+    resume = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hm:s:vd", ["help", "method=", "selenium=", "verbose", "delimiter"])
+        opts, args = getopt.getopt(sys.argv[1:], "hm:s:r:vd", ["help", "method=", "selenium=", "resume=", "verbose", "delimiter"])
     except getopt.GetoptError as err:
         # print help information and exit:
         print str(err)  # will print something like "option -a not recognized"
@@ -185,6 +186,8 @@ if __name__ == "__main__":
             add_delimiter_info = True
         elif o in ("-m", "--method"):
             method = a
+        elif o in ("-r", "--resume"):
+            resume = a
         elif o in ("-s", "--selenium"):
             use_selenium = (a.strip() in ['True', 'true', 1])
 
@@ -296,8 +299,16 @@ if __name__ == "__main__":
                     headers.append('branches_count')
                     headers.append('releases_count')
                     headers.append('contributors_count')
-                    moredata_writer.writerow(headers)
+                    if resume is not None:
+                        moredata_writer.writerow(headers)
                     for row in reposReader:
+                        if resume is not None:
+                            url_p1 = row[1].strip('"')
+                            url_p2 = row[1]
+                            if not ((resume == url_p1) or (resume == url_p2)):
+                                continue
+                            else:
+                                resume = None
                         while True:
                             try:
                                 scream.say('Line processing.. ')
